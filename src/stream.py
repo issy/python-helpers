@@ -1,23 +1,23 @@
 from typing import Any, Callable, Iterator, Literal, Self, TypeVar
 
-T1 = TypeVar("T1")
-T2 = TypeVar("T2")
-T3 = TypeVar("T3")
+T = TypeVar("T")
+T = TypeVar("T")
+T = TypeVar("T")
 
 
 class Stream:
-    _it: Iterator[T1]
+    _it: Iterator[T]
     _actions: list[tuple[Literal["map", "filter"], Callable[[Any], Any]]]
 
-    def __init__(self, _iter: Iterator[T1]):
+    def __init__(self, _iter: Iterator[T]):
         self._it = _iter
         self._actions = []
 
-    def map(self, fn: Callable[[T1 | Any], T2]) -> Self:
+    def map(self, fn: Callable[[T | Any], Any]) -> Self:
         self._actions.append(("map", fn))
         return self
 
-    def filter(self, fn: Callable[[T1 | T2], bool]) -> Self:
+    def filter(self, fn: Callable[[T | T], bool]) -> Self:
         self._actions.append(("filter", fn))
         return self
 
@@ -41,12 +41,23 @@ class Stream:
 
         return items
 
-    def reduce(self, fn: Callable[[T3, Any], T3], start_value: T3) -> T3:
+    def reduce(self, fn: Callable[[T, Any], T], start_value: T) -> T:
         current_value = start_value
         for item in self._get_results():
             current_value = fn(current_value, item)
 
         return current_value
+
+    def group_by(self, get_key: Callable[[Any], T]) -> dict[T, Any]:
+        def collector(groups: dict, item: Any) -> dict:
+            key = get_key(item)
+            if key not in groups:
+                groups[key] = []
+
+            groups[key].append(item)
+            return groups
+
+        return self.reduce(collector, {})
 
     def to_list(self) -> list[Any]:
         return self._get_results()
@@ -59,15 +70,15 @@ class Stream:
         return inner
 
     @staticmethod
-    def eq(to_match: T3) -> Callable[[T3], bool]:
-        def inner(i: T3) -> bool:
+    def eq(to_match: T) -> Callable[[T], bool]:
+        def inner(i: T) -> bool:
             return i == to_match
 
         return inner
 
     @staticmethod
-    def in_list(li: list[T3]) -> Callable[[T3], bool]:
-        def inner(i: T3) -> bool:
+    def in_list(li: list[T]) -> Callable[[T], bool]:
+        def inner(i: T) -> bool:
             return i in li
 
         return inner
