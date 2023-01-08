@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 setup(
     name="helpers",
     description="Functional programming helpers",

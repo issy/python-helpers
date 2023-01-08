@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterator, TypeVar, Self, Literal
+from typing import Any, Callable, Iterator, Literal, Self, TypeVar
 
 T1 = TypeVar("T1")
 T2 = TypeVar("T2")
